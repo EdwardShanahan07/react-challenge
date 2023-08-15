@@ -10,18 +10,30 @@ class Content extends Component {
 
     this.state = {
       isLoaded: false,
+      posts: [],
     };
+  }
+
+  handleChange(event) {
+    const inputText = event.target.value;
+    const filteredPosts = savedPosts.filter((post) => {
+      return post.name.toLowerCase().includes(inputText);
+    });
+
+    this.setState({ posts: filteredPosts });
+
+    console.log(filteredPosts);
   }
 
   loadContent() {
     setTimeout(() => {
-      return this.setState({ isLoaded: true });
+      return this.setState({ isLoaded: true, posts: savedPosts });
     }, 2000);
   }
 
   componentDidMount() {
+    this.setState({ posts: savedPosts });
     this.loadContent();
-    console.log("hello");
   }
 
   render() {
@@ -29,13 +41,24 @@ class Content extends Component {
       <div className={css.Content}>
         <div className={css.TitleBar}>
           <h1>My Photos</h1>
+
+          <form>
+            <label>Search:</label>
+            <input
+              id="searchInput"
+              onChange={(event) => this.handleChange(event)}
+              type="search"
+              placeholder="By Author"
+            />
+            <h4>posts found: {this.state.posts.length}</h4>
+          </form>
         </div>
 
         <div class={css.SearchResults}>
           {this.state.isLoaded === false ? (
             <Loader />
           ) : (
-            <PostItem posts={savedPosts} />
+            <PostItem posts={this.state.posts} />
           )}
         </div>
       </div>
