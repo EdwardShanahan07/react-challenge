@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import API_KEY from "../secrets";
 import Loader from "./Loader";
-import PostItem from "./PostItem";
+import PostItemAPI from "./PostItemAPI";
 import css from "./css/Content.module.css";
 import { savedPosts } from "../posts.json";
 
@@ -13,13 +13,14 @@ class Content extends Component {
     this.state = {
       isLoaded: false,
       posts: [],
+      savedPosts,
     };
   }
 
   handleChange(event) {
     const inputText = event.target.value;
-    const filteredPosts = savedPosts.filter((post) => {
-      return post.name.toLowerCase().includes(inputText);
+    const filteredPosts = this.state.savedPosts.filter((post) => {
+      return post.user.toLowerCase().includes(inputText);
     });
 
     this.setState({ posts: filteredPosts });
@@ -27,15 +28,21 @@ class Content extends Component {
     console.log(filteredPosts);
   }
 
-  loadContent() {
-    setTimeout(() => {
-      return this.setState({ isLoaded: true, posts: savedPosts });
-    }, 2000);
+  componentDidMount() {
+    this.fetchedImages();
   }
 
-  componentDidMount() {
-    this.setState({ posts: savedPosts });
-    this.loadContent();
+  async fetchedImages() {
+    const response = await axios.get(
+      `https://pixabay.com/api/?key=${API_KEY}&per_page=100`
+    );
+    const fetchedPosts = response.data.hits;
+
+    this.setState({
+      isLoaded: true,
+      posts: fetchedPosts,
+      savedPosts: fetchedPosts,
+    });
   }
 
   render() {
@@ -60,7 +67,7 @@ class Content extends Component {
           {this.state.isLoaded === false ? (
             <Loader />
           ) : (
-            <PostItem posts={this.state.posts} />
+            <PostItemAPI savedPosts={this.state.posts} />
           )}
         </div>
       </div>
